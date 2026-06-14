@@ -1,0 +1,22 @@
+{
+  "name": "altcredit-intelligence-platform",
+  "version": "1.0.0",
+  "description": "Alternative Credit Intelligence MCP Server for fintech companies",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "packages/mcp-server",
+    "langgraph-workflows",
+    "credit-engine",
+    "shared"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "dev": "npm run dev --workspace=apps/api",
+    "dev:mcp": "npm run dev --workspace=packages/mcp-server"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
