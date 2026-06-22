@@ -1,7 +1,7 @@
 // Transaction Analysis Agent
 
 const transactionService = require('../../../apps/api/src/services/transactionService');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * Transaction Analysis Agent

@@ -1,9 +1,9 @@
 // Savings Controller
 
 const savingsService = require('../services/savingsService');
-const { validate, createSavingsSchema, userIdSchema } = require('../../../../shared/src/utils/validator');
+const { validate, createSavingsSchema, userIdSchema } = require('shared/utils/validator');
 const { asyncHandler } = require('../middleware/errorHandler');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * Create a new savings record

@@ -1,8 +1,8 @@
 // Authentication Middleware
 
 const jwt = require('jsonwebtoken');
-const config = require('../../../../shared/src/config');
-const logger = require('../../../../shared/src/utils/logger');
+const config = require('shared/config');
+const logger = require('shared/utils/logger');
 
 /**
  * JWT Authentication middleware

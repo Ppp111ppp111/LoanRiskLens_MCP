@@ -1,3 +1,4 @@
+
 # MCP Integration Guide
 
 ## MCP Transport

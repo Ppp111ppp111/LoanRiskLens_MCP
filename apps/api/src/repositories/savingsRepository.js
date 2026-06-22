@@ -1,7 +1,7 @@
 // Savings Repository - Database operations for savings history
 
-const db = require('../../../../shared/src/database');
-const logger = require('../../../../shared/src/utils/logger');
+const db = require('shared/database');
+const logger = require('shared/utils/logger');
 
 class SavingsRepository {
   /**

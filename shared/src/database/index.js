@@ -10,16 +10,29 @@ let pool = null;
 function createPool() {
   if (pool) return pool;
 
-  pool = new Pool({
-    host: config.database.host,
-    port: config.database.port,
-    database: config.database.name,
-    user: config.database.user,
-    password: config.database.password,
+  const poolConfig = {
     max: config.database.max,
     idleTimeoutMillis: config.database.idleTimeoutMillis,
     connectionTimeoutMillis: config.database.connectionTimeoutMillis,
-  });
+  };
+
+  // Use connection string for Supabase/browser, otherwise individual params
+  if (config.database.connectionString) {
+    poolConfig.connectionString = config.database.connectionString;
+    // SSL is handled in connection string via sslmode=require
+  } else {
+    poolConfig.host = config.database.host;
+    poolConfig.port = config.database.port;
+    poolConfig.database = config.database.name;
+    poolConfig.user = config.database.user;
+    poolConfig.password = config.database.password;
+    // Use SSL only when explicitly enabled for local connections
+    if (config.database.ssl) {
+      poolConfig.ssl = { rejectUnauthorized: false };
+    }
+  }
+
+  pool = new Pool(poolConfig);
 
   pool.on('error', (err) => {
     logger.error('Unexpected database pool error', { error: err.message });

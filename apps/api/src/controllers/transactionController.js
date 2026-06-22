@@ -1,9 +1,9 @@
 // Transaction Controller
 
 const transactionService = require('../services/transactionService');
-const { validate, createTransactionSchema, transactionQuerySchema } = require('../../../../shared/src/utils/validator');
+const { validate, createTransactionSchema, transactionQuerySchema } = require('shared/utils/validator');
 const { asyncHandler } = require('../middleware/errorHandler');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * Create a new transaction

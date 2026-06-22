@@ -1,7 +1,7 @@
 // Credit Scoring Engine - Core scoring logic
 
-const config = require('../../shared/src/config');
-const helpers = require('../../shared/src/utils/helpers');
+const config = require('shared/config');
+const helpers = require('shared/utils/helpers');
 
 /**
  * Transaction Consistency Score Calculator

@@ -1,7 +1,7 @@
 // MCP Server Entry Point
 
 const { createMCPServer } = require('./server/mcpServer');
-const logger = require('../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 async function main() {
   try {

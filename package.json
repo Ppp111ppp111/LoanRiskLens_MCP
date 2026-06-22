@@ -13,8 +13,8 @@
   "scripts": {
     "build": "npm run build --workspaces",
     "test": "npm run test --workspaces",
-    "dev": "npm run dev --workspace=apps/api",
-    "dev:mcp": "npm run dev --workspace=packages/mcp-server"
+    "dev": "NODE_PATH=. node apps/api/src/index.js",
+    "dev:mcp": "NODE_PATH=. node packages/mcp-server/src/index.js"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -1,7 +1,7 @@
 // Savings Service - Business logic for savings analysis
 
 const savingsRepository = require('../repositories/savingsRepository');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 class SavingsService {
   /**

@@ -1,9 +1,12 @@
 // Main API Entry Point
-
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
+const path = require('path');
 const express = require('express');
-const config = require('../../shared/src/config');
-const db = require('../../shared/src/database');
-const logger = require('../../shared/src/utils/logger');
+
+// Use NODE_PATH for package resolution
+const config = require('shared/config');
+const db = require('shared/database');
+const logger = require('shared/utils/logger');
 const routes = require('./routes');
 const {
   securityHeaders,

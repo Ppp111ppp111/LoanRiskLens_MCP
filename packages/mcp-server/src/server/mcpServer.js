@@ -2,9 +2,9 @@
 
 const express = require('express');
 const http = require('http');
-const config = require('../../../../shared/src/config');
-const db = require('../../../../shared/src/database');
-const logger = require('../../../../shared/src/utils/logger');
+const config = require('shared/config');
+const db = require('shared/database');
+const logger = require('shared/utils/logger');
 const { TOOL_DEFINITIONS, executeTool } = require('../tools/creditTools');
 
 /**

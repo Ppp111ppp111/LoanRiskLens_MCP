@@ -1,7 +1,7 @@
 // Behavior Scoring Agent
 
 const scoringEngine = require('../../../../credit-engine/src/scoring');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * Behavior Scoring Agent

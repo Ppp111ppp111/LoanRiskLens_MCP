@@ -1,7 +1,7 @@
 // MCP Credit Intelligence Tools
 
 const creditService = require('../../../../apps/api/src/services/creditService');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * MCP Tool Definitions for Credit Intelligence

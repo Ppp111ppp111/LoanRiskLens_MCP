@@ -1,8 +1,8 @@
 // Risk Classification Agent
 
-const config = require('../../../../shared/src/config');
+const config = require('shared/config');
 const analysisEngine = require('../../../../credit-engine/src/analysis');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * Risk Classification Agent

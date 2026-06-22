@@ -2,10 +2,10 @@ module.exports = {
   rootDir: __dirname,
   testMatch: ['<rootDir>/tests/**/*.test.js'],
   moduleNameMapper: {
-    '^../../../shared/src/(.*)$': '<rootDir>/../../shared/src/$1',
-    '^../../shared/src/(.*)$': '<rootDir>/../../shared/src/$1',
+    '^shared/(.*)$': '<rootDishared/$1',
+    '^shared/(.*)$': '<rootDishared/$1',
     '^../../../credit-engine/src/(.*)$': '<rootDir>/../../credit-engine/src/$1',
-    '^@/(.*)$': '<rootDir>/../../shared/src/$1',
+    '^@/(.*)$': '<rootDishared/$1',
   },
   testEnvironment: 'node',
   verbose: true,

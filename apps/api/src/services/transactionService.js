@@ -2,9 +2,9 @@
 
 const transactionRepository = require('../repositories/transactionRepository');
 const savingsRepository = require('../repositories/savingsRepository');
-const config = require('../../../../shared/src/config');
-const helpers = require('../../../../shared/src/utils/helpers');
-const logger = require('../../../../shared/src/utils/logger');
+const config = require('shared/config');
+const helpers = require('shared/utils/helpers');
+const logger = require('shared/utils/logger');
 
 class TransactionService {
   /**

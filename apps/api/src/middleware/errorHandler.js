@@ -1,6 +1,6 @@
 // Error Handler Middleware
 
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * Global error handler middleware

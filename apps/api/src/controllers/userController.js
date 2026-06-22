@@ -1,11 +1,11 @@
 // User Controller
 
 const userRepository = require('../repositories/userRepository');
-const { validate, createUserSchema, userIdSchema } = require('../../../../shared/src/utils/validator');
+const { validate, createUserSchema, userIdSchema } = require('shared/utils/validator');
 const { asyncHandler } = require('../middleware/errorHandler');
 const { generateToken } = require('../middleware/auth');
 const bcrypt = require('bcryptjs');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * Create a new user

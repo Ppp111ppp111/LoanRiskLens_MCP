@@ -3,11 +3,11 @@
 const transactionService = require('./transactionService');
 const savingsService = require('./savingsService');
 const reportRepository = require('../repositories/reportRepository');
-const config = require('../../../../shared/src/config');
-const helpers = require('../../../../shared/src/utils/helpers');
+const config = require('shared/config');
+const helpers = require('shared/utils/helpers');
 const scoringEngine = require('../../../../credit-engine/src/scoring');
 const analysisEngine = require('../../../../credit-engine/src/analysis');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 class CreditService {
   /**

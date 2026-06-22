@@ -6,7 +6,7 @@ const behaviorScoringAgent = require('../agents/behaviorScoringAgent');
 const riskClassificationAgent = require('../agents/riskClassificationAgent');
 const creditDecisionAgent = require('../agents/creditDecisionAgent');
 const explanationAgent = require('../agents/explanationAgent');
-const logger = require('../../../../shared/src/utils/logger');
+const logger = require('shared/utils/logger');
 
 /**
  * Credit Intelligence Workflow
