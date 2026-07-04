@@ -14,7 +14,11 @@ const config = {
     max: parseInt(process.env.DB_POOL_MAX || '20'),
     idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'),
     connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '2000'),
-    ssl: process.env.DB_SSL === 'true' || process.env.DATABASE_URL ? true : false,
+    ssl: process.env.DB_SSL === 'true'
+      ? { rejectUnauthorized: false }
+      : process.env.DATABASE_URL
+        ? { rejectUnauthorized: false }
+        : false,
   },
 
   // JWT configuration
