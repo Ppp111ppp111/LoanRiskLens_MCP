@@ -40,7 +40,7 @@ function classifyRiskLevel(score, thresholds) {
  * @returns {number} Recommended loan amount
  */
 function calculateRecommendedLoanAmount(score, riskLevel, loanConfig) {
-  const multiplier = riskLevel === 'LOW' ? 0.8 : riskLevel === 'MEDIUM' ? 0.5 : 0.2;
+  const multiplier = riskLevel === 'LOW' ? 0.7 : riskLevel === 'MEDIUM' ? 0.5 : 0.2;
   const baseAmount = loanConfig.defaultAmount;
   const maxAmount = loanConfig.maxAmount;
   const minAmount = loanConfig.minAmount;

@@ -88,6 +88,8 @@ async function transaction(callback) {
 // Initialize database schema
 async function initializeSchema() {
   const schema = `
+    CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
     -- Users table
     CREATE TABLE IF NOT EXISTS users (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -99,6 +101,14 @@ async function initializeSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    -- Safe schema upgrades for databases created by older versions.
+    -- CREATE TABLE IF NOT EXISTS does not add missing columns.
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS occupation VARCHAR(100);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS employer_name VARCHAR(255);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS monthly_income DECIMAL(12, 2);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
     -- Transactions table
     CREATE TABLE IF NOT EXISTS transactions (
@@ -113,6 +123,10 @@ async function initializeSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    ALTER TABLE transactions ADD COLUMN IF NOT EXISTS description TEXT;
+    ALTER TABLE transactions ADD COLUMN IF NOT EXISTS timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    ALTER TABLE transactions ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
     -- Savings history table
     CREATE TABLE IF NOT EXISTS savings_history (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -122,6 +136,11 @@ async function initializeSchema() {
       balance DECIMAL(12, 2) DEFAULT 0,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    ALTER TABLE savings_history ADD COLUMN IF NOT EXISTS deposit_amount DECIMAL(12, 2) DEFAULT 0;
+    ALTER TABLE savings_history ADD COLUMN IF NOT EXISTS withdrawal_amount DECIMAL(12, 2) DEFAULT 0;
+    ALTER TABLE savings_history ADD COLUMN IF NOT EXISTS balance DECIMAL(12, 2) DEFAULT 0;
+    ALTER TABLE savings_history ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
     -- Underwriting reports table
     CREATE TABLE IF NOT EXISTS underwriting_reports (
@@ -136,6 +155,12 @@ async function initializeSchema() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
+    ALTER TABLE underwriting_reports ADD COLUMN IF NOT EXISTS recommended_amount DECIMAL(12, 2);
+    ALTER TABLE underwriting_reports ADD COLUMN IF NOT EXISTS explanation TEXT;
+    ALTER TABLE underwriting_reports ADD COLUMN IF NOT EXISTS details JSONB;
+    ALTER TABLE underwriting_reports ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+    ALTER TABLE underwriting_reports ALTER COLUMN id SET DEFAULT gen_random_uuid();
+
     -- Audit logs table
     CREATE TABLE IF NOT EXISTS audit_logs (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -147,6 +172,13 @@ async function initializeSchema() {
       user_agent TEXT,
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+
+    ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_id UUID;
+    ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS resource VARCHAR(100);
+    ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS details JSONB;
+    ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45);
+    ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS user_agent TEXT;
+    ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
 
     -- Create indexes for performance
     CREATE INDEX IF NOT EXISTS idx_transactions_user_id ON transactions(user_id);

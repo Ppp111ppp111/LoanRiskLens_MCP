@@ -36,7 +36,7 @@ class CreditDecisionAgent {
     logger.info('CreditDecisionAgent: Generating credit decision');
 
     try {
-      const creditScore = behaviorScore.overallScore;
+      const creditScore = behaviorScore.creditScore ?? behaviorScore.overallScore;
       const riskLevel = riskClassification.riskLevel;
 
       // Generate decision
@@ -101,12 +101,14 @@ class CreditDecisionAgent {
     const explanations = [];
 
     // Overall score explanation
-    if (behaviorScore.overallScore >= 75) {
-      explanations.push(`Strong overall behavior score of ${behaviorScore.overallScore}`);
-    } else if (behaviorScore.overallScore >= 50) {
-      explanations.push(`Moderate overall behavior score of ${behaviorScore.overallScore}`);
+    const scoreForExplanation = behaviorScore.creditScore ?? behaviorScore.overallScore;
+
+    if (scoreForExplanation >= 75) {
+      explanations.push(`Strong credit score of ${scoreForExplanation}`);
+    } else if (scoreForExplanation >= 50) {
+      explanations.push(`Moderate credit score of ${scoreForExplanation}`);
     } else {
-      explanations.push(`Weak overall behavior score of ${behaviorScore.overallScore}`);
+      explanations.push(`Weak credit score of ${scoreForExplanation}`);
     }
 
     // Risk factor explanations
@@ -127,7 +129,8 @@ class CreditDecisionAgent {
     }
 
     // Savings-specific explanation
-    if (savingsAnalysis.currentBalance > savingsAnalysis.averageMonthlyInflow * 3) {
+    if (transactionAnalysis.averageMonthlyInflow > 0 &&
+        savingsAnalysis.currentBalance > transactionAnalysis.averageMonthlyInflow * 3) {
       explanations.push('Strong liquidity buffer provides repayment cushion');
     }
 

@@ -32,6 +32,9 @@ cp .env.example .env
 # Create database
 createdb altcredit_db
 
+# Load demo underwriting users
+npm run seed
+
 # Start API server
 npm run dev
 
@@ -79,6 +82,7 @@ Score = (Transaction Consistency × 0.35)
 
 ### Documentation
 
+- [Agent Context Guide](docs/AGENT_CONTEXT.md) - main aim, business context, demo questions, and expected results for agentic IDEs
 - [Setup Guide](docs/SETUP.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [LangGraph Workflows](docs/LANGGRAPH.md)

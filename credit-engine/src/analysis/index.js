@@ -128,7 +128,17 @@ function analyzeTransactionPatterns(transactionData) {
  * @returns {Object} Risk classification
  */
 function classifyRisk(scores) {
-  const { creditScore, transactionScore, savingsScore, cashflowScore } = scores;
+  const {
+    creditScore,
+    transactionScore,
+    savingsScore,
+    cashflowScore,
+    failedRate = 0,
+    currentBalance,
+    totalDeposits,
+    totalWithdrawals,
+    liquidityRatio,
+  } = scores;
 
   const riskFactors = [];
   const protectiveFactors = [];
@@ -145,6 +155,20 @@ function classifyRisk(scores) {
   }
   if (creditScore < 40) {
     riskFactors.push('Low overall credit score');
+  }
+  if (failedRate >= 0.25) {
+    riskFactors.push('Severe failed transaction rate');
+  } else if (failedRate >= 0.15) {
+    riskFactors.push('Elevated failed transaction rate');
+  }
+  if (currentBalance !== undefined && currentBalance < 0) {
+    riskFactors.push('Negative savings balance');
+  }
+  if (totalDeposits !== undefined && totalWithdrawals !== undefined && totalWithdrawals > totalDeposits) {
+    riskFactors.push('Withdrawals exceed deposits');
+  }
+  if (liquidityRatio !== undefined && liquidityRatio < 0.15) {
+    riskFactors.push('Thin liquidity buffer');
   }
 
   // Protective factors
@@ -165,7 +189,10 @@ function classifyRisk(scores) {
   let riskLevel = 'MEDIUM';
   if (creditScore >= 70 && riskFactors.length === 0) {
     riskLevel = 'LOW';
-  } else if (creditScore < 40 || riskFactors.length >= 3) {
+  } else if (creditScore < 40 || riskFactors.length >= 3 ||
+             riskFactors.includes('Severe failed transaction rate') ||
+             (riskFactors.includes('Negative savings balance') &&
+              riskFactors.includes('Withdrawals exceed deposits'))) {
     riskLevel = 'HIGH';
   }
 

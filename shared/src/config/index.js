@@ -4,21 +4,23 @@ require('dotenv').config();
 const config = {
   // Database configuration
   database: {
-    // Use DATABASE_URL for Supabase/browser or individual params for local
-    connectionString: process.env.DATABASE_URL,
-    host: process.env.DB_HOST || 'localhost',
-    port: parseInt(process.env.DB_PORT || '5432'),
-    name: process.env.DB_NAME || 'altcredit_db',
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || 'postgres',
+    // Use DATABASE_URL for Supabase (single source of truth).
+    // If DATABASE_URL is missing, fall back to local params.
+    connectionString: process.env.DATABASE_URL || undefined,
+
+    host: process.env.DATABASE_URL ? undefined : (process.env.DB_HOST || 'localhost'),
+    port: process.env.DATABASE_URL ? undefined : parseInt(process.env.DB_PORT || '5432'),
+    name: process.env.DATABASE_URL ? undefined : (process.env.DB_NAME || 'altcredit_db'),
+    user: process.env.DATABASE_URL ? undefined : (process.env.DB_USER || 'postgres'),
+    password: process.env.DATABASE_URL ? undefined : (process.env.DB_PASSWORD || 'postgres'),
+
     max: parseInt(process.env.DB_POOL_MAX || '20'),
     idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT || '30000'),
     connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT || '2000'),
-    ssl: process.env.DB_SSL === 'true'
+
+    ssl: process.env.DATABASE_URL
       ? { rejectUnauthorized: false }
-      : process.env.DATABASE_URL
-        ? { rejectUnauthorized: false }
-        : false,
+      : (process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false),
   },
 
   // JWT configuration

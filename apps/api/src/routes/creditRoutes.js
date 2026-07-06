@@ -2,7 +2,7 @@
 
 const express = require('express');
 const creditController = require('../controllers/creditController');
-const { authenticate } = require('../middleware/auth');
+const { authenticate, authorizeSelfOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -10,15 +10,15 @@ const router = express.Router();
 router.use(authenticate);
 
 // Analyze creditworthiness
-router.post('/creditworthiness', creditController.analyzeCreditworthiness);
+router.post('/creditworthiness', authorizeSelfOrAdmin, creditController.analyzeCreditworthiness);
 
 // Analyze financial behavior
-router.post('/financial-behavior', creditController.analyzeFinancialBehavior);
+router.post('/financial-behavior', authorizeSelfOrAdmin, creditController.analyzeFinancialBehavior);
 
 // Generate underwriting report
-router.post('/underwriting-report', creditController.generateUnderwritingReport);
+router.post('/underwriting-report', authorizeSelfOrAdmin, creditController.generateUnderwritingReport);
 
 // Get quick credit score
-router.get('/:userId/score', creditController.getCreditScore);
+router.get('/:userId/score', authorizeSelfOrAdmin, creditController.getCreditScore);
 
 module.exports = router;

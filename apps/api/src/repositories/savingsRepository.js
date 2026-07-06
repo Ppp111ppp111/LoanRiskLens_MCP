@@ -25,6 +25,7 @@ class SavingsRepository {
     return result.rows[0];
   }
 
+  
   /**
    * Find savings records by user ID
    * @param {string} userId - User UUID
@@ -83,15 +84,15 @@ class SavingsRepository {
   async getSavingsTrend(userId, months = 6) {
     const query = `
       SELECT
-        DATE_TRUNC('month', created_at) as month,
+        DATE_TRUNC('month', created_at::timestamp) as month,
         COALESCE(SUM(deposit_amount), 0) as total_deposits,
         COALESCE(SUM(withdrawal_amount), 0) as total_withdrawals,
         COALESCE(AVG(balance), 0) as avg_balance,
         COALESCE(MAX(balance), 0) as end_balance
       FROM savings_history
       WHERE user_id = $1
-        AND created_at >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month' * $2)
-      GROUP BY DATE_TRUNC('month', created_at)
+        AND created_at::timestamp >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month' * $2)
+      GROUP BY DATE_TRUNC('month', created_at::timestamp)
       ORDER BY month ASC
     `;
 

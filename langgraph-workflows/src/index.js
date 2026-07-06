@@ -1,8 +1,11 @@
 // LangGraph Workflows Index
 
-const CreditIntelligenceWorkflow = require('./workflows/creditIntelligenceWorkflow');
+const {
+  CreditIntelligenceWorkflow,
+  createCreditIntelligenceWorkflow,
+} = require('./workflows/creditIntelligenceWorkflow');
 
 module.exports = {
   CreditIntelligenceWorkflow,
-  createCreditIntelligenceWorkflow: CreditIntelligenceWorkflow.prototype.constructor,
+  createCreditIntelligenceWorkflow,
 };

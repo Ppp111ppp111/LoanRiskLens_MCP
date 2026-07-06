@@ -1,7 +1,7 @@
 // Savings Analysis Agent
 
 const savingsService = require('../../../apps/api/src/services/savingsService');
-const analysisEngine = require('../../../../credit-engine/src/analysis');
+const analysisEngine = require('../../../credit-engine/src/analysis');
 const logger = require('shared/utils/logger');
 
 /**

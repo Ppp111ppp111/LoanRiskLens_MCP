@@ -112,7 +112,35 @@ curl -X POST https://altcredit-mcp.onrender.com/mcp \
 
 ---
 
-## Step 5: Connect Claude Desktop
+## Step 5: Seed Demo Underwriting Data
+
+After the API has successfully deployed once, seed the CSV demo users into the production database.
+
+### Option A: Render Shell
+
+1. Open the `altcredit-api` service in Render.
+2. Go to **Shell**.
+3. Run:
+
+```bash
+npm run seed:dry-run
+npm run seed
+```
+
+### Option B: Local Machine Against Production DB
+
+Set `DATABASE_URL` locally to the same production database URL and run:
+
+```bash
+npm run seed:dry-run
+npm run seed
+```
+
+The seed command is idempotent. It upserts records by UUID, so it is safe to rerun after updating the CSV files.
+
+---
+
+## Step 6: Connect Claude Desktop
 
 Edit MCP config file at `~/Library/Application Support/Claude/mcp_config.json`:
 

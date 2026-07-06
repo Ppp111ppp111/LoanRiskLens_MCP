@@ -2,7 +2,7 @@
 
 const express = require('express');
 const userController = require('../controllers/userController');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate, authorize, authorizeSelfOrAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -13,10 +13,10 @@ router.post('/', userController.createUser);
 router.get('/', authenticate, authorize('admin'), userController.listUsers);
 
 // Get user by ID
-router.get('/:userId', authenticate, userController.getUserById);
+router.get('/:userId', authenticate, authorizeSelfOrAdmin, userController.getUserById);
 
 // Update user
-router.put('/:userId', authenticate, userController.updateUser);
+router.put('/:userId', authenticate, authorizeSelfOrAdmin, userController.updateUser);
 
 // Delete user (admin only)
 router.delete('/:userId', authenticate, authorize('admin'), userController.deleteUser);

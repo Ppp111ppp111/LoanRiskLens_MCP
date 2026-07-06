@@ -20,6 +20,9 @@ function calculateTransactionConsistencyScore(transactionAnalysis) {
   const successRate = totalTransactions > 0
     ? ((totalTransactions - failedTransactions) / totalTransactions) * 100
     : 0;
+  const failedRate = totalTransactions > 0
+    ? failedTransactions / totalTransactions
+    : 0;
   const successScore = successRate * 0.3;
 
   // Factor 2: Income consistency (40%)
@@ -40,7 +43,21 @@ function calculateTransactionConsistencyScore(transactionAnalysis) {
   }
   const ratioScoreComponent = ratioScore * 0.3;
 
-  return Math.round(successScore + incomeScore + ratioScoreComponent);
+  let score = successScore + incomeScore + ratioScoreComponent;
+
+  if (failedRate >= 0.25) {
+    score -= 25;
+  } else if (failedRate >= 0.15) {
+    score -= 15;
+  } else if (failedRate >= 0.10) {
+    score -= 5;
+  }
+
+  if (totalTransactions > 0 && totalTransactions < 20) {
+    score -= 8;
+  }
+
+  return Math.min(100, Math.max(0, Math.round(score)));
 }
 
 /**
@@ -52,9 +69,12 @@ function calculateSavingsDisciplineScore(savingsAnalysis) {
     totalDeposits,
     totalWithdrawals,
     savingsFrequency,
-    averageDepositAmount,
-    averageWithdrawalAmount
   } = savingsAnalysis;
+  const currentBalance = parseFloat(savingsAnalysis.currentBalance) || 0;
+  const averageDepositAmount =
+    parseFloat(savingsAnalysis.averageDepositAmount ?? savingsAnalysis.averageDeposit) || 0;
+  const averageWithdrawalAmount =
+    parseFloat(savingsAnalysis.averageWithdrawalAmount ?? savingsAnalysis.averageWithdrawal) || 0;
 
   // Factor 1: Savings ratio (40%)
   let savingsRatio = 50;
@@ -73,7 +93,9 @@ function calculateSavingsDisciplineScore(savingsAnalysis) {
 
   // Factor 3: Deposit vs Withdrawal pattern (25%)
   let patternScore = 50;
-  if (averageDepositAmount > 0) {
+  if (averageDepositAmount <= 0 && totalWithdrawals > 0) {
+    patternScore = 10;
+  } else if (averageDepositAmount > 0) {
     const withdrawalRatio = averageWithdrawalAmount / averageDepositAmount;
     // Lower withdrawal ratio relative to deposits = better discipline
     if (withdrawalRatio <= 0.3) {
@@ -90,7 +112,19 @@ function calculateSavingsDisciplineScore(savingsAnalysis) {
   }
   const patternComponent = patternScore * 0.25;
 
-  return Math.round(ratioScore + frequencyComponent + patternComponent);
+  let score = ratioScore + frequencyComponent + patternComponent;
+
+  if (currentBalance < 0) {
+    score -= 15;
+  } else if (totalDeposits > 0 && currentBalance < totalDeposits * 0.10) {
+    score -= 6;
+  }
+
+  if (totalWithdrawals > totalDeposits) {
+    score -= 12;
+  }
+
+  return Math.min(100, Math.max(0, Math.round(score)));
 }
 
 /**
@@ -98,7 +132,7 @@ function calculateSavingsDisciplineScore(savingsAnalysis) {
  * Analyzes overall cash flow patterns
  */
 function calculateCashflowStabilityScore(transactionAnalysis, savingsAnalysis) {
-  const { incomeConsistencyScore, averageMonthlyInflow } = transactionAnalysis;
+  const { incomeConsistencyScore, averageMonthlyInflow, averageMonthlyOutflow } = transactionAnalysis;
   const { currentBalance } = savingsAnalysis;
 
   // Factor 1: Income consistency (50%)
@@ -122,9 +156,22 @@ function calculateCashflowStabilityScore(transactionAnalysis, savingsAnalysis) {
   const balanceComponent = balanceScore * 0.3;
 
   // Factor 3: Positive cash flow tendency (20%)
-  const cashflowComponent = 20; // Placeholder for more complex logic
+  let cashflowScore = 50;
+  if (averageMonthlyInflow > 0 && averageMonthlyOutflow >= 0) {
+    const cashflowRatio = averageMonthlyInflow / (averageMonthlyOutflow || 1);
+    if (cashflowRatio >= 1.25) {
+      cashflowScore = 90;
+    } else if (cashflowRatio >= 1.0) {
+      cashflowScore = 70;
+    } else if (cashflowRatio >= 0.8) {
+      cashflowScore = 45;
+    } else {
+      cashflowScore = 25;
+    }
+  }
+  const cashflowComponent = cashflowScore * 0.2;
 
-  return Math.round(incomeComponent + balanceComponent + cashflowComponent);
+  return Math.min(100, Math.max(0, Math.round(incomeComponent + balanceComponent + cashflowComponent)));
 }
 
 /**
@@ -178,6 +225,15 @@ function calculateCreditScore(transactionAnalysis, savingsAnalysis, behavioralSc
 
   // Apply bonuses/penalties based on specific factors
   let adjustedScore = baseScore;
+  const totalTransactions = transactionAnalysis.totalTransactions || 0;
+  const failedTransactions = transactionAnalysis.failedTransactions || 0;
+  const failedRate = totalTransactions > 0 ? failedTransactions / totalTransactions : 0;
+  const averageDepositAmount =
+    parseFloat(savingsAnalysis.averageDepositAmount ?? savingsAnalysis.averageDeposit) || 0;
+  const averageWithdrawalAmount =
+    parseFloat(savingsAnalysis.averageWithdrawalAmount ?? savingsAnalysis.averageWithdrawal) || 0;
+  const currentBalance = parseFloat(savingsAnalysis.currentBalance) || 0;
+  const averageMonthlyInflow = parseFloat(transactionAnalysis.averageMonthlyInflow) || 0;
 
   // Bonus: Very consistent transactions
   if (transactionAnalysis.totalTransactions >= 50 &&
@@ -191,8 +247,24 @@ function calculateCreditScore(transactionAnalysis, savingsAnalysis, behavioralSc
   }
 
   // Penalty: High withdrawal behavior
-  if (savingsAnalysis.averageWithdrawalAmount > savingsAnalysis.averageDepositAmount * 0.8) {
+  if (averageDepositAmount > 0 && averageWithdrawalAmount > averageDepositAmount * 0.8) {
     adjustedScore = Math.max(0, adjustedScore - 10);
+  }
+
+  if (failedRate >= 0.25) {
+    adjustedScore = Math.max(0, adjustedScore - 25);
+  } else if (failedRate >= 0.15) {
+    adjustedScore = Math.max(0, adjustedScore - 15);
+  }
+
+  if (currentBalance < 0) {
+    adjustedScore = Math.max(0, adjustedScore - 20);
+  } else if (averageMonthlyInflow > 0 && currentBalance < averageMonthlyInflow * 0.25) {
+    adjustedScore = Math.max(0, adjustedScore - 5);
+  }
+
+  if (savingsAnalysis.totalWithdrawals > savingsAnalysis.totalDeposits) {
+    adjustedScore = Math.max(0, adjustedScore - 15);
   }
 
   // Penalty: Very low transaction count

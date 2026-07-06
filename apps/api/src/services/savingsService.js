@@ -43,6 +43,8 @@ class SavingsService {
       withdrawalCount,
       averageDeposit: depositCount > 0 ? totalDeposits / depositCount : 0,
       averageWithdrawal: withdrawalCount > 0 ? totalWithdrawals / withdrawalCount : 0,
+      averageDepositAmount: depositCount > 0 ? totalDeposits / depositCount : 0,
+      averageWithdrawalAmount: withdrawalCount > 0 ? totalWithdrawals / withdrawalCount : 0,
       largestDeposit: parseFloat(summary.largest_deposit) || 0,
       largestWithdrawal: parseFloat(summary.largest_withdrawal) || 0,
       highestBalance: parseFloat(summary.highest_balance) || 0,

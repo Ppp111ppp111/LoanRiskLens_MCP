@@ -8,6 +8,13 @@ jest.mock('../src/repositories/reportRepository', () => ({
   getLatestByUserId: jest.fn().mockResolvedValue({ id: 'report-123' }),
 }));
 
+jest.mock('../src/repositories/userRepository', () => ({
+  findById: jest.fn().mockResolvedValue({
+    id: '550e8400-e29b-41d4-a716-446655440000',
+    name: 'Test User',
+  }),
+}));
+
 jest.mock('../src/services/transactionService', () => ({
   analyzeTransactions: jest.fn().mockResolvedValue({
     totalTransactions: 100,

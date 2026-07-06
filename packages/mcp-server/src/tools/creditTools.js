@@ -3,6 +3,8 @@
 const creditService = require('../../../../apps/api/src/services/creditService');
 const logger = require('shared/utils/logger');
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
  * MCP Tool Definitions for Credit Intelligence
  */
@@ -161,18 +163,24 @@ const TOOL_DEFINITIONS = [
  * @returns {Promise<Object>} Tool execution result
  */
 async function executeTool(toolName, input) {
-  logger.info('MCP tool execution requested', { toolName, userId: input.user_id });
+  const userId = input?.user_id;
+
+  if (!userId || !UUID_PATTERN.test(userId)) {
+    throw new Error('Invalid or missing user_id. Expected a UUID.');
+  }
+
+  logger.info('MCP tool execution requested', { toolName, userId });
 
   try {
     switch (toolName) {
       case 'analyze_creditworthiness':
-        return await creditService.analyzeCreditworthiness(input.user_id);
+        return formatCreditworthiness(await creditService.analyzeCreditworthiness(userId));
 
       case 'analyze_financial_behavior':
-        return await creditService.analyzeFinancialBehavior(input.user_id);
+        return formatFinancialBehavior(await creditService.analyzeFinancialBehavior(userId));
 
       case 'generate_underwriting_report':
-        return await creditService.generateUnderwritingReport(input.user_id);
+        return formatUnderwritingReport(await creditService.generateUnderwritingReport(userId));
 
       default:
         throw new Error(`Unknown tool: ${toolName}`);
@@ -181,6 +189,56 @@ async function executeTool(toolName, input) {
     logger.error('MCP tool execution failed', { toolName, error: error.message });
     throw error;
   }
+}
+
+function formatCreditworthiness(result) {
+  return {
+    credit_score: result.creditScore,
+    risk_level: result.riskLevel,
+    recommended_loan_amount: result.recommendedLoanAmount,
+    repayment_confidence: result.repaymentConfidence,
+    decision: result.decision,
+    explanation: result.explanation,
+    details: result.details,
+  };
+}
+
+function formatFinancialBehavior(result) {
+  return {
+    behavior_profile: result.behaviorProfile,
+    savings_score: result.savingsScore,
+    cashflow_stability: result.cashflowStability,
+    withdrawal_behavior: result.withdrawalBehavior,
+    details: result.details,
+  };
+}
+
+function formatUnderwritingReport(result) {
+  return {
+    user_id: result.userId,
+    report_date: result.reportDate,
+    credit_score: result.creditScore,
+    risk_level: result.riskLevel,
+    recommendation: result.recommendation,
+    recommended_amount: result.recommendedAmount,
+    repayment_confidence: result.repaymentConfidence,
+    explanation: result.explanation,
+    financial_behavior: {
+      profile: result.financialBehavior?.profile,
+      savings_score: result.financialBehavior?.savingsScore,
+      cashflow_stability: result.financialBehavior?.cashflowStability,
+      withdrawal_behavior: result.financialBehavior?.withdrawalBehavior,
+    },
+    risk_factors: result.riskFactors,
+    protective_factors: result.protectiveFactors,
+    score_breakdown: {
+      overall: result.scoreBreakdown?.overall,
+      transaction_consistency: result.scoreBreakdown?.transactionConsistency,
+      savings_discipline: result.scoreBreakdown?.savingsDiscipline,
+      cashflow_stability: result.scoreBreakdown?.cashflowStability,
+    },
+    saved_report_id: result.savedReportId,
+  };
 }
 
 /**
@@ -195,4 +253,7 @@ module.exports = {
   TOOL_DEFINITIONS,
   executeTool,
   getToolDefinitions,
+  formatCreditworthiness,
+  formatFinancialBehavior,
+  formatUnderwritingReport,
 };

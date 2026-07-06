@@ -3,6 +3,7 @@
 const transactionService = require('./transactionService');
 const savingsService = require('./savingsService');
 const reportRepository = require('../repositories/reportRepository');
+const userRepository = require('../repositories/userRepository');
 const config = require('shared/config');
 const helpers = require('shared/utils/helpers');
 const scoringEngine = require('../../../../credit-engine/src/scoring');
@@ -17,6 +18,7 @@ class CreditService {
    */
   async analyzeCreditworthiness(userId) {
     logger.info('Analyzing creditworthiness', { userId });
+    await this.assertUserExists(userId);
 
     // Get transaction analysis
     const transactionAnalysis = await transactionService.analyzeTransactions(userId);
@@ -43,6 +45,15 @@ class CreditService {
       transactionScore: behaviorScore.transactionScore,
       savingsScore: behaviorScore.savingsScore,
       cashflowScore: behaviorScore.cashflowScore,
+      failedRate: transactionAnalysis.totalTransactions > 0
+        ? transactionAnalysis.failedTransactions / transactionAnalysis.totalTransactions
+        : 0,
+      currentBalance: savingsAnalysis.currentBalance,
+      totalDeposits: savingsAnalysis.totalDeposits,
+      totalWithdrawals: savingsAnalysis.totalWithdrawals,
+      liquidityRatio: transactionAnalysis.averageMonthlyInflow > 0
+        ? savingsAnalysis.currentBalance / transactionAnalysis.averageMonthlyInflow
+        : 0,
     });
 
     // Calculate recommended loan amount
@@ -122,6 +133,7 @@ class CreditService {
    */
   async analyzeFinancialBehavior(userId) {
     logger.info('Analyzing financial behavior', { userId });
+    await this.assertUserExists(userId);
 
     // Get transaction analysis
     const transactionAnalysis = await transactionService.analyzeTransactions(userId);
@@ -295,6 +307,17 @@ class CreditService {
     } else {
       return 'Credit application requires manual review and additional verification.';
     }
+  }
+
+  async assertUserExists(userId) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      const error = new Error('User not found');
+      error.statusCode = 404;
+      error.name = 'NotFoundError';
+      throw error;
+    }
+    return user;
   }
 }
 

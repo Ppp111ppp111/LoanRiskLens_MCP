@@ -92,6 +92,33 @@ function authorize(...allowedRoles) {
 }
 
 /**
+ * Allow admins or the user who owns the requested resource.
+ * Checks userId from route params first, then request body.
+ */
+function authorizeSelfOrAdmin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'Authentication required',
+    });
+  }
+
+  if (req.user.role === 'admin') {
+    return next();
+  }
+
+  const requestedUserId = req.params.userId || req.body.userId;
+  if (requestedUserId && requestedUserId === req.user.userId) {
+    return next();
+  }
+
+  return res.status(403).json({
+    error: 'Forbidden',
+    message: 'You can only access your own customer data',
+  });
+}
+
+/**
  * Generate JWT token
  * @param {Object} payload - Token payload
  * @returns {string} JWT token
@@ -117,6 +144,7 @@ module.exports = {
   authenticate,
   optionalAuth,
   authorize,
+  authorizeSelfOrAdmin,
   generateToken,
   generateRefreshToken,
 };

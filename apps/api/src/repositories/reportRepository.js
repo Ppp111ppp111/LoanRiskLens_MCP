@@ -11,17 +11,19 @@ class ReportRepository {
    */
   async create(reportData) {
     const { userId, creditScore, riskLevel, recommendedAmount, recommendation, explanation, details } = reportData;
+    const { v4: uuidv4 } = require('uuid');
 
     const query = `
       INSERT INTO underwriting_reports
-        (user_id, credit_score, risk_level, recommended_amount, recommendation, explanation, details)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+        (id, user_id, credit_score, risk_level, recommended_amount, recommendation, explanation, details)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id, user_id as "userId", credit_score as "creditScore",
                 risk_level as "riskLevel", recommended_amount as "recommendedAmount",
                 recommendation, explanation, details, created_at as "createdAt"
     `;
 
     const result = await db.query(query, [
+      uuidv4(),
       userId,
       creditScore,
       riskLevel,

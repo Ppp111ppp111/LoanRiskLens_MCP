@@ -1,7 +1,7 @@
 // Risk Classification Agent
 
 const config = require('shared/config');
-const analysisEngine = require('../../../../credit-engine/src/analysis');
+const analysisEngine = require('../../../credit-engine/src/analysis');
 const logger = require('shared/utils/logger');
 
 /**
@@ -32,10 +32,19 @@ class RiskClassificationAgent {
     try {
       // Combine all scores for classification
       const combinedScores = {
-        creditScore: behaviorScore.overallScore,
+        creditScore: behaviorScore.creditScore ?? behaviorScore.overallScore,
         transactionScore: behaviorScore.componentScores.transactionConsistency,
         savingsScore: behaviorScore.componentScores.savingsDiscipline,
         cashflowScore: behaviorScore.componentScores.cashflowStability,
+        failedRate: transactionAnalysis.totalTransactions > 0
+          ? transactionAnalysis.failedTransactions / transactionAnalysis.totalTransactions
+          : 0,
+        currentBalance: savingsAnalysis.currentBalance,
+        totalDeposits: savingsAnalysis.totalDeposits,
+        totalWithdrawals: savingsAnalysis.totalWithdrawals,
+        liquidityRatio: transactionAnalysis.averageMonthlyInflow > 0
+          ? savingsAnalysis.currentBalance / transactionAnalysis.averageMonthlyInflow
+          : 0,
       };
 
       // Get classification from analysis engine
@@ -105,7 +114,8 @@ class RiskClassificationAgent {
       protectiveFactors.push('Extensive transaction history');
     }
 
-    if (savingsAnalysis.currentBalance > savingsAnalysis.averageMonthlyInflow * 3) {
+    if (transactionAnalysis.averageMonthlyInflow > 0 &&
+        savingsAnalysis.currentBalance > transactionAnalysis.averageMonthlyInflow * 3) {
       protectiveFactors.push('Strong emergency fund');
     }
 

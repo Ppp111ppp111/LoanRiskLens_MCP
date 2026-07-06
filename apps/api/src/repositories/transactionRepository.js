@@ -99,7 +99,7 @@ class TransactionRepository {
   async getMonthlyAggregates(userId, months = 6) {
     const query = `
       SELECT
-        DATE_TRUNC('month', timestamp) as month,
+        DATE_TRUNC('month', timestamp::timestamp) as month,
         COUNT(*) as total_transactions,
         COUNT(CASE WHEN type = 'CREDIT' AND status = 'SUCCESS' THEN 1 END) as credit_count,
         COUNT(CASE WHEN type = 'DEBIT' AND status = 'SUCCESS' THEN 1 END) as debit_count,
@@ -108,8 +108,8 @@ class TransactionRepository {
         COUNT(CASE WHEN status = 'FAILED' THEN 1 END) as failed_count
       FROM transactions
       WHERE user_id = $1
-        AND timestamp >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month' * $2)
-      GROUP BY DATE_TRUNC('month', timestamp)
+        AND timestamp::timestamp >= DATE_TRUNC('month', CURRENT_DATE - INTERVAL '1 month' * $2)
+      GROUP BY DATE_TRUNC('month', timestamp::timestamp)
       ORDER BY month DESC
     `;
 
@@ -125,13 +125,13 @@ class TransactionRepository {
   async getIncomeFrequency(userId) {
     const query = `
       SELECT
-        COUNT(DISTINCT DATE_TRUNC('week', timestamp)) as unique_weeks,
-        COUNT(DISTINCT DATE_TRUNC('month', timestamp)) as unique_months,
+        COUNT(DISTINCT DATE_TRUNC('week', timestamp::timestamp)) as unique_weeks,
+        COUNT(DISTINCT DATE_TRUNC('month', timestamp::timestamp)) as unique_months,
         COUNT(CASE WHEN type = 'CREDIT' THEN 1 END) as income_count,
         COALESCE(SUM(CASE WHEN type = 'CREDIT' AND status = 'SUCCESS' THEN amount ELSE 0 END), 0) as total_income
       FROM transactions
       WHERE user_id = $1
-        AND timestamp >= CURRENT_DATE - INTERVAL '6 months'
+        AND timestamp::timestamp >= CURRENT_DATE - INTERVAL '6 months'
     `;
 
     const result = await db.query(query, [userId]);

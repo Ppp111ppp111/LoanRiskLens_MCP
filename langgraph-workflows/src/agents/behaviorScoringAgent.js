@@ -1,6 +1,6 @@
 // Behavior Scoring Agent
 
-const scoringEngine = require('../../../../credit-engine/src/scoring');
+const scoringEngine = require('../../../credit-engine/src/scoring');
 const logger = require('shared/utils/logger');
 
 /**
@@ -41,6 +41,17 @@ class BehaviorScoringAgent {
       // Calculate weighted overall score
       const overallScore = this.calculateWeightedScore(componentScores);
 
+      const creditScore = scoringEngine.calculateCreditScore(
+        this.toScoringTransactionAnalysis(transactionAnalysis),
+        this.toScoringSavingsAnalysis(savingsAnalysis),
+        {
+          overallScore,
+          transactionScore: componentScores.transactionConsistency,
+          savingsScore: componentScores.savingsDiscipline,
+          cashflowScore: componentScores.cashflowStability,
+        }
+      );
+
       // Generate stability indicators
       const stabilityIndicators = this.generateStabilityIndicators(componentScores);
 
@@ -48,6 +59,7 @@ class BehaviorScoringAgent {
         agent: this.name,
         timestamp: new Date().toISOString(),
         overallScore,
+        creditScore,
         componentScores,
         stabilityIndicators,
         weights: this.weights,
@@ -72,6 +84,7 @@ class BehaviorScoringAgent {
 
       logger.info('BehaviorScoringAgent: Scoring complete', {
         overallScore: result.overallScore,
+        creditScore: result.creditScore,
         components: componentScores,
       });
 
@@ -181,6 +194,27 @@ class BehaviorScoringAgent {
     if (stableCount >= 2) return 'MODERATELY_STABLE';
     if (stableCount >= 1) return 'MIXED';
     return 'UNSTABLE';
+  }
+
+  toScoringTransactionAnalysis(transactionAnalysis) {
+    return {
+      totalTransactions: transactionAnalysis.totalTransactions || 0,
+      failedTransactions: transactionAnalysis.failedTransactions || 0,
+      incomeConsistencyScore: transactionAnalysis.incomeConsistencyScore || 50,
+      averageMonthlyInflow: transactionAnalysis.averageMonthlyInflow || 0,
+      averageMonthlyOutflow: transactionAnalysis.averageMonthlyOutflow || 0,
+    };
+  }
+
+  toScoringSavingsAnalysis(savingsAnalysis) {
+    return {
+      totalDeposits: savingsAnalysis.totalDeposits || 0,
+      totalWithdrawals: savingsAnalysis.totalWithdrawals || 0,
+      currentBalance: savingsAnalysis.currentBalance || 0,
+      savingsFrequency: savingsAnalysis.savingsFrequency || 0,
+      averageDeposit: savingsAnalysis.averageDeposit || 0,
+      averageWithdrawal: savingsAnalysis.averageWithdrawal || 0,
+    };
   }
 }
 
