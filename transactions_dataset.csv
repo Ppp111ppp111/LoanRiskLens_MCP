@@ -1,4 +1,4 @@
-id,user_id,amount,type,status,category,description,timestamp
+id,user_id,amount,type,status,category,descriptiontimestamp
 660e8400-1001-41d4-a716-000000000001,550e8400-e29b-41d4-a716-446655440001,9300,CREDIT,SUCCESS,upi,Customer income inflow,2026-02-01
 660e8400-1001-41d4-a716-000000000002,550e8400-e29b-41d4-a716-446655440001,9300,CREDIT,SUCCESS,upi,Customer income inflow,2026-02-02
 660e8400-1001-41d4-a716-000000000003,550e8400-e29b-41d4-a716-446655440001,9300,CREDIT,SUCCESS,upi,Customer income inflow,2026-02-03
