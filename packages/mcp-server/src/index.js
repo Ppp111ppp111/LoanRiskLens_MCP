@@ -6,19 +6,20 @@ const logger = require('shared/utils/logger');
 async function main() {
   try {
     const server = await createMCPServer({
-      port: parseInt(process.env.MCP_PORT || '3001'),
-      host: process.env.MCP_HOST || 'localhost',
+      port: parseInt(process.env.PORT || process.env.MCP_PORT || '3001', 10),
+      host: process.env.HOST || process.env.MCP_HOST || '0.0.0.0',
     });
 
     await server.start();
+    const displayHost = server.host === '0.0.0.0' ? 'localhost' : server.host;
 
     console.log(`
 ╔══════════════════════════════════════════════════════════════╗
 ║     AltCredit Intelligence MCP Server                       ║
 ║     Version: 1.0.0                                          ║
 ╠══════════════════════════════════════════════════════════════╣
-║  MCP Endpoint: http://localhost:${server.port}/mcp                ║
-║  Health Check: http://localhost:${server.port}/health             ║
+║  MCP Endpoint: http://${displayHost}:${server.port}/mcp                ║
+║  Health Check: http://${displayHost}:${server.port}/health             ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  Available Tools:                                            ║
 ║    • analyze_creditworthiness                               ║

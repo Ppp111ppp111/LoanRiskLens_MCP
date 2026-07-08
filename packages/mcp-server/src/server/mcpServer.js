@@ -18,7 +18,7 @@ const { TOOL_DEFINITIONS, executeTool } = require('../tools/creditTools');
 class AltCreditMCPServer {
   constructor(options = {}) {
     this.port = options.port || config.mcp.port;
-    this.host = options.host || 'localhost';
+    this.host = options.host || process.env.MCP_HOST || '0.0.0.0';
     this.server = null;
     this.expressApp = null;
     this.isRunning = false;
@@ -153,12 +153,13 @@ class AltCreditMCPServer {
     return new Promise((resolve, reject) => {
       this.server.listen(this.port, this.host, () => {
         this.isRunning = true;
+        const displayHost = this.host === '0.0.0.0' ? 'localhost' : this.host;
         logger.info(`AltCredit MCP Server started`, {
           host: this.host,
           port: this.port,
           endpoints: {
-            health: `http://${this.host}:${this.port}/health`,
-            mcp: `http://${this.host}:${this.port}/mcp`,
+            health: `http://${displayHost}:${this.port}/health`,
+            mcp: `http://${displayHost}:${this.port}/mcp`,
           },
         });
         resolve(this);
@@ -212,8 +213,8 @@ async function createMCPServer(options = {}) {
 // Run as standalone server
 async function main() {
   const server = await createMCPServer({
-    port: process.env.MCP_PORT || 3001,
-    host: process.env.MCP_HOST || 'localhost',
+    port: parseInt(process.env.PORT || process.env.MCP_PORT || '3001', 10),
+    host: process.env.HOST || process.env.MCP_HOST || '0.0.0.0',
   });
 
   await server.start();
