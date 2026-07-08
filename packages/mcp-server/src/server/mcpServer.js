@@ -32,6 +32,17 @@ class AltCreditMCPServer {
     this.expressApp = express();
     this.expressApp.use(express.json());
 
+    // CORS headers — allow any MCP client origin (Claude Desktop, Cursor, etc.)
+    this.expressApp.use((req, res, next) => {
+      res.header('Access-Control-Allow-Origin', '*');
+      res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      if (req.method === 'OPTIONS') {
+        return res.sendStatus(204);
+      }
+      next();
+    });
+
     // Health check endpoint
     this.expressApp.get('/health', (req, res) => {
       res.json({
@@ -44,51 +55,66 @@ class AltCreditMCPServer {
 
     // MCP protocol endpoint
     this.expressApp.post('/mcp', async (req, res) => {
-      try {
-        const { method, params, id } = req.body;
+      // Guard against missing/malformed body
+      if (!req.body || typeof req.body !== 'object') {
+        return res.status(400).json({
+          jsonrpc: '2.0',
+          error: { code: -32700, message: 'Parse error: request body must be JSON' },
+          id: null,
+        });
+      }
 
+      const { method, params, id } = req.body;
+
+      try {
         switch (method) {
           case 'tools/list':
             res.json({
               jsonrpc: '2.0',
-              result: {
-                tools: TOOL_DEFINITIONS,
-              },
+              result: { tools: TOOL_DEFINITIONS },
               id,
             });
             break;
 
-          case 'tools/call':
-            const { name, arguments: toolArgs } = params;
-            const result = await executeTool(name, toolArgs);
-            res.json({
-              jsonrpc: '2.0',
-              result: {
-                content: [
-                  {
-                    type: 'text',
-                    text: JSON.stringify(result, null, 2),
-                  },
-                ],
-              },
-              id,
-            });
+          case 'tools/call': {
+            const { name, arguments: toolArgs } = params || {};
+            try {
+              const result = await executeTool(name, toolArgs);
+              res.json({
+                jsonrpc: '2.0',
+                result: {
+                  content: [{ type: 'text', text: JSON.stringify(result, null, 2) }],
+                },
+                id,
+              });
+            } catch (toolError) {
+              // Return tool errors as MCP isError content — clients show the
+              // message instead of reporting "backend unreachable".
+              logger.warn('MCP tool error', { name, error: toolError.message });
+              res.json({
+                jsonrpc: '2.0',
+                result: {
+                  content: [
+                    {
+                      type: 'text',
+                      text: `Error: ${toolError.message}`,
+                    },
+                  ],
+                  isError: true,
+                },
+                id,
+              });
+            }
             break;
+          }
 
           case 'initialize':
             res.json({
               jsonrpc: '2.0',
               result: {
                 protocolVersion: '2024-11-05',
-                capabilities: {
-                  tools: {
-                    listChanged: true,
-                  },
-                },
-                serverInfo: {
-                  name: config.mcp.name,
-                  version: config.mcp.version,
-                },
+                capabilities: { tools: { listChanged: true } },
+                serverInfo: { name: config.mcp.name, version: config.mcp.version },
               },
               id,
             });
@@ -97,9 +123,7 @@ class AltCreditMCPServer {
           case 'tools/list_changed':
             res.json({
               jsonrpc: '2.0',
-              result: {
-                tools: TOOL_DEFINITIONS,
-              },
+              result: { tools: TOOL_DEFINITIONS },
               id,
             });
             break;
@@ -107,10 +131,7 @@ class AltCreditMCPServer {
           default:
             res.json({
               jsonrpc: '2.0',
-              error: {
-                code: -32601,
-                message: `Method not found: ${method}`,
-              },
+              error: { code: -32601, message: `Method not found: ${method}` },
               id,
             });
         }
@@ -118,11 +139,8 @@ class AltCreditMCPServer {
         logger.error('MCP request error', { error: error.message });
         res.json({
           jsonrpc: '2.0',
-          error: {
-            code: -32603,
-            message: error.message,
-          },
-          id: req.body.id,
+          error: { code: -32603, message: error.message },
+          id,
         });
       }
     });
