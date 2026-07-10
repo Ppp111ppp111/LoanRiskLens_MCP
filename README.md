@@ -48,99 +48,102 @@ LoanRiskLens analyzes **behavioral financial signals** instead:
 **Output:** `APPROVED` / `REVIEW` / `REJECTED` with recommended loan amount and human-readable explanation.
 
 ---
-
 ## System Architecture
+
 ```mermaid
-graph TD
+flowchart TB
 
-%% =========================
-%% Clients
-%% =========================
+subgraph USERS["End Users / Clients"]
+direction TB
+U1["Claude Desktop"]
+U2["Cursor IDE"]
+U3["Loan Officer UI"]
+U4["Founder Dashboard"]
+end
 
-A[End Users<br/>Loan Officer / Claude Desktop / Cursor / VS Code AI]
+subgraph CLIENT["MCP Client"]
+direction TB
+Q["Natural Language Request"]
+end
 
-B[MCP Client<br/>Natural Language Requests]
+subgraph SERVER["Alternative Credit Intelligence MCP Server"]
+direction TB
+T1["Analyze Creditworthiness"]
+T2["Analyze Financial Behavior"]
+T3["Generate Underwriting Report"]
+end
 
-A --> B
+subgraph GRAPH["LangGraph Multi-Agent Workflow"]
 
-%% =========================
-%% MCP Server
-%% =========================
+direction TB
 
-B --> C[Alternative Credit Intelligence MCP Server]
+Loader["User Context Loader"]
 
-C --> C1[analyze_creditworthiness()]
-C --> C2[analyze_financial_behavior()]
-C --> C3[generate_underwriting_report()]
+Transaction["Transaction Agent"]
 
-%% =========================
-%% LangGraph
-%% =========================
+Savings["Savings Agent"]
 
-C --> D[LangGraph Workflow Engine]
+Behavior["Behavior Agent"]
 
-D --> E[User Context Loader Agent]
+Risk["Risk Agent"]
 
-E --> F1[Transaction Agent]
-E --> F2[Savings Agent]
+Decision["Credit Decision Agent"]
 
-F1 --> G[Behavior Scoring Agent]
-F2 --> G
+Explanation["Explanation Agent"]
 
-G --> H[Risk Classification Agent]
+Loader --> Transaction
+Loader --> Savings
 
-H --> I[Credit Decision Agent]
+Transaction --> Behavior
+Savings --> Behavior
 
-I --> J[Explanation Agent]
+Behavior --> Risk
 
-%% =========================
-%% Business Rules
-%% =========================
+Risk --> Decision
 
-J --> K[Credit Intelligence Engine]
+Decision --> Explanation
 
-K --> K1[Rule Based Scoring]
-K --> K2[Risk Rules]
-K --> K3[Loan Recommendation Rules]
-K --> K4[Explainability Rules]
+end
 
-%% =========================
-%% Backend
-%% =========================
+subgraph API["Express Backend"]
 
-K --> L[Express API]
+direction TB
 
-L --> L1[Controllers]
-L --> L2[Services]
-L --> L3[Repositories]
+Controllers["Controllers"]
 
-%% =========================
-%% Database
-%% =========================
+Services["Services"]
 
-L --> M[(PostgreSQL)]
+Repositories["Repositories"]
 
-M --> M1[users]
+end
 
-M --> M2[transactions]
+subgraph DATABASE["PostgreSQL"]
 
-M --> M3[savings_history]
+direction TB
 
-M --> M4[underwriting_reports]
+Users["users"]
 
-M --> M5[audit_logs]
+Transactions["transactions"]
 
-%% =========================
-%% Response
-%% =========================
+SavingsTable["savings_history"]
 
-M --> N[JSON Underwriting Report]
+Reports["underwriting_reports"]
 
-N --> C
+Audit["audit_logs"]
 
-C --> B
+end
 
-B --> O[Loan Decision Returned]
+USERS --> CLIENT
+
+CLIENT --> SERVER
+
+SERVER --> GRAPH
+
+GRAPH --> API
+
+API --> DATABASE
+
+DATABASE --> SERVER
 ```
 
 ## Credit Scoring Pipeline
