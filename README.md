@@ -11,6 +11,170 @@ LoanRiskLens is a production-grade **Alternative Credit Intelligence** platform 
 
 ---
 
+## 🗺️ Platform Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             Alternative Credit Intelligence MCP Platform                                     │
+│                 Explainable AI Underwriting for Non-Salaried & Self-Employed Borrowers                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+
+                                        ┌──────────────────────────────┐
+                                        │     End Users / Clients      │
+                                        │──────────────────────────────│
+                                        │ • Claude Desktop             │
+                                        │ • Cursor IDE                 │
+                                        │ • VS Code AI                 │
+                                        │ • Internal Loan Officer UI   │
+                                        │ • Fintech Dashboard          │
+                                        └──────────────┬───────────────┘
+                                                       │
+                                                       ▼
+                              ┌───────────────────────────────────────────────┐
+                              │               MCP Client Layer                │
+                              │───────────────────────────────────────────────│
+                              │ Natural Language Request                      │
+                              │                                               │
+                              │ "Can we approve a ₹50,000 loan?"              │
+                              │ "Generate underwriting report"                │
+                              │ "Analyze financial behaviour"                 │
+                              └──────────────┬────────────────────────────────┘
+                                             │
+                                             ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                               Alternative Credit MCP Server                                                  │
+│──────────────────────────────────────────────────────────────────────────────────────────────────────────────│
+│ MCP SDK                                                                                                      │
+│                                                                                                              │
+│ Registered Tools                                                                                             │
+│ • analyze_creditworthiness()                                                                                 │
+│ • analyze_financial_behavior()                                                                               │
+│ • generate_underwriting_report()                                                                             │
+│                                                                                                              │
+│ Input Validation │ Authentication │ Tool Routing │ Structured JSON Output                                    │
+└───────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              LangGraph Multi-Agent Workflow Engine                                            │
+│                              (Shared State + Agent Orchestration)                                             │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+                                   ┌──────────────────────────┐
+                                   │ User Context Loader      │
+                                   │──────────────────────────│
+                                   │ Load User               │
+                                   │ Validate UUID           │
+                                   │ Fetch User Records      │
+                                   └─────────────┬───────────┘
+                                                 │
+                      ┌──────────────────────────┴──────────────────────────┐
+                      │                                                     │
+                      ▼                                                     ▼
+        ┌────────────────────────────┐                     ┌────────────────────────────┐
+        │    Transaction Agent       │                     │      Savings Agent         │
+        │────────────────────────────│                     │────────────────────────────│
+        │ • Monthly Inflow           │                     │ • Deposit Analysis         │
+        │ • Monthly Outflow          │                     │ • Withdrawal Analysis      │
+        │ • Failed Transactions      │                     │ • Balance Analysis         │
+        │ • Cashflow Stability       │                     │ • Savings Discipline       │
+        │ • Transaction Score        │                     │ • Savings Score            │
+        └──────────────┬─────────────┘                     └──────────────┬─────────────┘
+                       │                                                  │
+                       └──────────────────────┬───────────────────────────┘
+                                              ▼
+                          ┌──────────────────────────────────────────────┐
+                          │          Behavior Scoring Agent              │
+                          │──────────────────────────────────────────────│
+                          │ Merge Transaction + Savings Signals          │
+                          │                                              │
+                          │ Financial Behaviour Score                    │
+                          │ Financial Stability                          │
+                          │ Behaviour Profile                            │
+                          └──────────────────────┬───────────────────────┘
+                                                 ▼
+                          ┌──────────────────────────────────────────────┐
+                          │         Risk Classification Agent            │
+                          │──────────────────────────────────────────────│
+                          │ Rule-Based Risk Engine                       │
+                          │                                              │
+                          │ LOW                                          │
+                          │ MEDIUM                                       │
+                          │ HIGH                                         │
+                          │                                              │
+                          │ Risk Factors                                 │
+                          └──────────────────────┬───────────────────────┘
+                                                 ▼
+                          ┌──────────────────────────────────────────────┐
+                          │        Credit Decision Agent                 │
+                          │──────────────────────────────────────────────│
+                          │ Loan Recommendation                          │
+                          │                                              │
+                          │ APPROVED                                     │
+                          │ REVIEW                                       │
+                          │ REJECTED                                     │
+                          │                                              │
+                          │ Recommended Amount                           │
+                          │ Repayment Confidence                         │
+                          └──────────────────────┬───────────────────────┘
+                                                 ▼
+                          ┌──────────────────────────────────────────────┐
+                          │          Explanation Agent                   │
+                          │──────────────────────────────────────────────│
+                          │ Explain WHY                                  │
+                          │                                              │
+                          │ Human-readable report                        │
+                          │ Underwriting summary                         │
+                          │ Business reasoning                           │
+                          └──────────────────────┬───────────────────────┘
+                                                 │
+                                                 ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                             Credit Intelligence / Business Rules Engine                                      │
+│──────────────────────────────────────────────────────────────────────────────────────────────────────────────│
+│ • Credit Score Formula                                                                                       │
+│ • Savings Rules                                                                                              │
+│ • Cashflow Rules                                                                                             │
+│ • Behaviour Rules                                                                                            │
+│ • Risk Rules                                                                                                 │
+│ • Loan Recommendation Rules                                                                                  │
+│ • Explainability Rules                                                                                       │
+└───────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                  Backend API Layer (Express.js)                                              │
+│──────────────────────────────────────────────────────────────────────────────────────────────────────────────│
+│ Controllers → Services → Repositories                                                                        │
+│                                                                                                              │
+│ /health                                                                                                      │
+│ /users                                                                                                       │
+│ /transactions                                                                                                │
+│ /savings                                                                                                     │
+│ /credit                                                                                                      │
+│ /underwriting                                                                                                │
+│                                                                                                              │
+│ JWT │ Validation │ Error Handling │ Audit Logging                                                            │
+└───────────────────────────────────────────────┬──────────────────────────────────────────────────────────────┘
+                                                │
+                                                ▼
+┌──────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                       PostgreSQL Database                                                    │
+│──────────────────────────────────────────────────────────────────────────────────────────────────────────────│
+│ users                                                                                                        │
+│ transactions                                                                                                 │
+│ savings_history                                                                                              │
+│ underwriting_reports                                                                                         │
+│ audit_logs                                                                                                   │
+│                                                                                                              │
+│ UUID │ Indexes │ Foreign Keys │ JSONB │ Constraints                                                          │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## 📋 Table of Contents
 
 - [Business Context](#business-context)
@@ -476,6 +640,4 @@ LoanRiskLens_MCP/
 
 ---
 
-## License
 
-MIT © 2024 LoanRiskLens
