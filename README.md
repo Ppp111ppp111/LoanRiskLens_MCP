@@ -50,88 +50,98 @@ LoanRiskLens analyzes **behavioral financial signals** instead:
 ---
 
 ## System Architecture
-
 ```mermaid
-graph TB
-    subgraph CLIENTS["🖥️ MCP Clients"]
-        CD["Claude Desktop"]
-        CU["Cursor IDE"]
-        RC["REST Clients / Apps"]
-        AI["Custom AI Agents"]
-    end
+graph TD
 
-    subgraph RENDER["☁️ Render.com — Production"]
-        subgraph MCP_SVC["altcredit-mcp.onrender.com"]
-            MCP_EP["POST /mcp · JSON-RPC 2.0"]
-            MCP_H["GET /health"]
-        end
-        subgraph API_SVC["altcredit-apis.onrender.com"]
-            API_EP["REST API · /api/*"]
-            API_H["GET /api/health"]
-        end
-    end
+%% =========================
+%% Clients
+%% =========================
 
-    subgraph DB["🗄️ Supabase · PostgreSQL"]
-        T1["users"]
-        T2["transactions"]
-        T3["savings_history"]
-        T4["underwriting_reports"]
-        T5["audit_logs"]
-    end
+A[End Users<br/>Loan Officer / Claude Desktop / Cursor / VS Code AI]
 
-    CD -- "JSON-RPC POST" --> MCP_EP
-    CU -- "JSON-RPC POST" --> MCP_EP
-    AI -- "JSON-RPC POST" --> MCP_EP
-    RC -- "HTTP REST" --> API_EP
-    MCP_EP -- "calls creditService" --> API_SVC
-    API_SVC -- "pg Pool" --> DB
-    MCP_EP -- "pg Pool" --> DB
+B[MCP Client<br/>Natural Language Requests]
+
+A --> B
+
+%% =========================
+%% MCP Server
+%% =========================
+
+B --> C[Alternative Credit Intelligence MCP Server]
+
+C --> C1[analyze_creditworthiness()]
+C --> C2[analyze_financial_behavior()]
+C --> C3[generate_underwriting_report()]
+
+%% =========================
+%% LangGraph
+%% =========================
+
+C --> D[LangGraph Workflow Engine]
+
+D --> E[User Context Loader Agent]
+
+E --> F1[Transaction Agent]
+E --> F2[Savings Agent]
+
+F1 --> G[Behavior Scoring Agent]
+F2 --> G
+
+G --> H[Risk Classification Agent]
+
+H --> I[Credit Decision Agent]
+
+I --> J[Explanation Agent]
+
+%% =========================
+%% Business Rules
+%% =========================
+
+J --> K[Credit Intelligence Engine]
+
+K --> K1[Rule Based Scoring]
+K --> K2[Risk Rules]
+K --> K3[Loan Recommendation Rules]
+K --> K4[Explainability Rules]
+
+%% =========================
+%% Backend
+%% =========================
+
+K --> L[Express API]
+
+L --> L1[Controllers]
+L --> L2[Services]
+L --> L3[Repositories]
+
+%% =========================
+%% Database
+%% =========================
+
+L --> M[(PostgreSQL)]
+
+M --> M1[users]
+
+M --> M2[transactions]
+
+M --> M3[savings_history]
+
+M --> M4[underwriting_reports]
+
+M --> M5[audit_logs]
+
+%% =========================
+%% Response
+%% =========================
+
+M --> N[JSON Underwriting Report]
+
+N --> C
+
+C --> B
+
+B --> O[Loan Decision Returned]
 ```
-
----
-
-## Internal Components
-
-```mermaid
-graph TB
-    subgraph MCP["packages/mcp-server"]
-        MCPS["mcpServer.js · HTTP JSON-RPC Router"]
-        TOOLS["creditTools.js · Tool Definitions + Dispatcher"]
-        MCPS --> TOOLS
-    end
-
-    subgraph API["apps/api"]
-        CS["creditService.js\nanalyzeCreditworthiness()\nanalyzeFinancialBehavior()\ngenerateUnderwritingReport()"]
-        TS["transactionService.js\nanalyzeTransactions()"]
-        SS["savingsService.js\nanalyzeSavings()"]
-        RP["Repositories\nreport · user · transaction · savings · audit"]
-    end
-
-    subgraph ENGINE["credit-engine"]
-        SC["scoring/index.js\ncalculateTransactionConsistencyScore()\ncalculateSavingsDisciplineScore()\ncalculateCashflowStabilityScore()\ncalculateOverallBehaviorScore()\ncalculateCreditScore()"]
-        AN["analysis/index.js\nclassifyRisk()\nanalyzeSavingsProfile()\nanalyzeWithdrawalBehavior()"]
-    end
-
-    subgraph SHARED["shared/"]
-        CFG["config · DB / JWT / Weights / Loan"]
-        DBS["database · pg Pool · query() · transaction()"]
-        HLP["helpers · generateCreditDecision()\ncalculateRecommendedLoanAmount()"]
-    end
-
-    TOOLS --> CS
-    CS --> TS
-    CS --> SS
-    CS --> SC
-    CS --> AN
-    CS --> HLP
-    TS --> RP
-    SS --> RP
-    RP --> DBS
-    SC --> CFG
-    SC --> HLP
-```
-
----
 
 ## Credit Scoring Pipeline
 
