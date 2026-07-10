@@ -15,9 +15,7 @@ LoanRiskLens is a production-grade **Alternative Credit Intelligence** platform 
 
 - [Business Context](#business-context)
 - [System Architecture](#system-architecture)
-- [Internal Components](#internal-components)
 - [Credit Scoring Pipeline](#credit-scoring-pipeline)
-- [LangGraph Agent Workflow](#langgraph-agent-workflow)
 - [Database Schema](#database-schema)
 - [Deployment Architecture](#deployment-architecture)
 - [MCP Client Setup](#mcp-client-setup)
@@ -196,49 +194,6 @@ Credit Score = (Transaction Consistency × 0.35)
 | ≥ 70  | `LOW`     | **APPROVED** | Up to ₹2,00,000 |
 | 40–69 | `MEDIUM`  | **REVIEW**   | Up to ₹75,000  |
 | < 40  | `HIGH`    | **REJECTED** | Not applicable |
-
----
-
-## LangGraph Agent Workflow
-
-```mermaid
-sequenceDiagram
-    participant C as Client
-    participant W as CreditIntelligenceWorkflow
-    participant A1 as TransactionAnalysisAgent
-    participant A2 as SavingsAnalysisAgent
-    participant A3 as BehaviorScoringAgent
-    participant A4 as RiskClassificationAgent
-    participant A5 as CreditDecisionAgent
-    participant A6 as ExplanationAgent
-    participant DB as PostgreSQL
-
-    C->>W: execute(userId)
-
-    W->>A1: execute(userId)
-    A1->>DB: getTransactionSummary()
-    DB-->>A1: transactions
-    A1-->>W: transactionStabilityScore
-
-    W->>A2: execute(userId)
-    A2->>DB: getSavingsSummary()
-    DB-->>A2: savings
-    A2-->>W: savingsScore, liquidityScore
-
-    W->>A3: execute(txAnalysis, savingsAnalysis)
-    A3-->>W: overallScore + breakdown
-
-    W->>A4: execute(behaviorScore, txAnalysis, savingsAnalysis)
-    A4-->>W: riskLevel + riskFactors
-
-    W->>A5: execute(riskClassification, behaviorScore)
-    A5-->>W: decision + recommendedAmount + loanTerms
-
-    W->>A6: execute(creditDecision, riskClassification)
-    A6-->>W: mainExplanation + plainLanguageSummary
-
-    W-->>C: Complete Workflow Result
-```
 
 ---
 
