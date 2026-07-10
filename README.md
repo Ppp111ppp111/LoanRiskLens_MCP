@@ -26,7 +26,20 @@ LoanRiskLens is a production-grade **Alternative Credit Intelligence** platform 
 ---
 
 ## Business Context
+Business Problem
+#The Problem
+Millions of self-employed and non-salaried people—including kirana shop owners, delivery partners, taxi drivers, freelancers, street vendors, and small merchants—are rejected for loans because they lack traditional credit indicators such as salary slips, formal employment records, or a CIBIL history.
 
+As a result:
+Good borrowers are rejected despite healthy financial habits.
+Loan officers spend significant time manually reviewing applications.
+Fintech companies struggle to distinguish trustworthy borrowers from risky ones.
+Credit decisions are often inconsistent and difficult to explain.
+
+Traditional underwriting relies on historical credit records instead of actual financial behavior, leaving a large underserved population without fair access to credit.
+
+
+#Solution
 Fintech companies serving **self-employed and informal-income customers** need to underwrite users who lack:
 - Traditional CIBIL/credit scores
 - Salary slips or formal ITR
@@ -45,6 +58,7 @@ LoanRiskLens analyzes **behavioral financial signals** instead:
 
 **Output:** `APPROVED` / `REVIEW` / `REJECTED` with recommended loan amount and human-readable explanation.
 
+The MCP Server exposes this intelligence through standardized MCP tools, allowing AI assistants such as Claude Desktop, Cursor, and internal fintech applications to perform explainable credit analysis.
 ---
 ## System Architecture
 
